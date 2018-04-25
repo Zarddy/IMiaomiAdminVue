@@ -1,0 +1,54 @@
+/*主题颜色*/
+
+$main-color: #005bac;
+$sub-color: #FF6A06;
+$main-bg-color: #f1f4f7;
+$sub-bg-color: #f0f0f0;
+
+/*文字颜色*/
+
+$deep-text-color: #000;
+$main-text-color: #333;
+$detail-text-color: #666;
+
+/*层级关系*/
+
+$top-layer: 1000;
+$middle-layer: 500;
+$bottom-layer: 100;
+
+/*边框颜色*/
+
+$border-color: #e5e5e5;
+
+/*文字大小*/
+
+$tiny-size: 12px; //10px;
+$samll-size: 14px; //12px;
+$normal-size: 16px; //14px;
+$middle-size: 18px; //16px;
+$big-size: 20px; //18px;
+$super-big-size: 22px; //20px;
+
+/* 文字超出隐藏 */
+
+@mixin text-hidden {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+@mixin text-hiddens($num) {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: $num;
+    text-overflow: ellipsis;
+    overflow: hidden;
+}
+
+//cell
+@mixin active-style($color) {
+    &:active {
+        background: $color;
+    }
+}
