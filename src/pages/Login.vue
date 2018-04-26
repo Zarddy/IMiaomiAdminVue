@@ -54,6 +54,9 @@ export default {
             }
         };
     },
+    mounted() {
+        this.$http.defaults.headers['Authorization'] = '';
+    },
     methods: {
         submitForm(formName) {
             this.$refs[formName].validate((valid) => {
@@ -68,9 +71,17 @@ export default {
                             if (data.status == 200) {
                                 // TODO 登录成功，将会返回token
                                 console.log("登录成功，token: " + data.data.token);
+
+                                this.$http.defaults.headers['Authorization'] = data.data.token;
+
+                                let base64Data = Base64.encode(JSON.stringify({ token: data.data.token}));
+                                sessionStorage.setItem("user", base64Data);
+
+                                // 跳转到List页面
+                                this.$router.push({path: '/cat/list'});
+
                             } else {
-                                // TODO 登录失败
-                                console.log("登录失败，msg: " + data.msg);
+                                // 登录失败
                             }
                         }
                     )

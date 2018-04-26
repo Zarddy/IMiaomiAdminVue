@@ -7,6 +7,7 @@ import ElementUI from 'element-ui'
 import { Loading } from 'element-ui'
 import axios from 'axios'
 import store from './vuex/index'
+import { Base64 } from 'js-base64'
 
 router.beforeEach((to, from, next) => {
     //   console.log(to, from), 
@@ -15,7 +16,7 @@ router.beforeEach((to, from, next) => {
 
 Vue.config.productionTip = false
 Vue.use(ElementUI)
-
+Vue.prototype.$indexs = router;
 
 //网络请求
 var instance = axios.create({
@@ -37,24 +38,48 @@ instance.interceptors.response.use(
     function(res) {
         // 对响应数据做点什么
         store.dispatch('setLoading', false)
-        if (res.data.code == 400 || res.data.code == 500) {
+        if (res.data.status == 401) {
             ElementUI.Message({
-                message: res.data.info,
+                message: res.data.msg,
+                type: 'error'
+            });
+            return Promise.reject(res.data.msg);
+        } else if (res.data.status != 200) {
+            ElementUI.Message({
+                message: res.data.msg,
                 type: 'error'
             })
-            return Promise.reject(res.data.info);
+            return Promise.reject(res.data.msg);
         }
         return res.data;
     },
     function(error) {
         // 对响应错误做点什么
         ElementUI.Message({
-            message: '网络请求出错，请联系技术人员',
-            type: 'error'
-        })
+                message: '网络请求出错，请联系技术人员',
+                type: 'error'
+            })
+            // router.push({ path: '/' });
         return Promise.reject(error);
     }
 );
+
+//检测 sessionstirage 是否存在用户
+if (!!sessionStorage.getItem('user')) {
+    let token = ''
+
+    try {
+        let user = JSON.parse(Base64.decode(sessionStorage.getItem('user')));
+        token = user.token;
+
+    } catch (error) {
+        sessionStorage.removeItem('user');
+        location.href = '/';
+    }
+
+    //设置jwt
+    instance.defaults.headers['Authorization'] = token;
+}
 
 //设置网络请求
 Vue.prototype.$http = instance;
@@ -63,6 +88,7 @@ Vue.prototype.$http = instance;
 new Vue({
     el: '#app',
     router,
+    store,
     components: { App },
     template: '<App/>'
 })
