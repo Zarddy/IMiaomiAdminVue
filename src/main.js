@@ -8,20 +8,51 @@ import { Loading } from 'element-ui'
 import axios from 'axios'
 import store from './vuex/index'
 import { Base64 } from 'js-base64'
+import vuePicturePreview from 'vue-picture-preview'
 
 router.beforeEach((to, from, next) => {
     //   console.log(to, from), 
-    next();
+    // next();
+
+    let token = ''
+    try {
+        let user = JSON.parse(Base64.decode(sessionStorage.getItem('user')));
+        token = user.token;
+
+    } catch (error) {
+        sessionStorage.removeItem('user');
+    }
+
+    if (to.name == 'Login' && token) {
+        next({
+            path: '/cat/list',
+        });
+    } else if (to.meta.requireAuth) {
+
+        if (token) {
+            next();
+        } else {
+            next({
+                path: '/',
+            });
+        }
+
+    } else {
+        next();
+    }
+
 })
 
 Vue.config.productionTip = false
 Vue.use(ElementUI)
+Vue.use(vuePicturePreview)
 Vue.prototype.$indexs = router;
 
 //网络请求
 var instance = axios.create({
     // headers: {Authorization: ''},
-    baseURL: "http://127.0.0.1:8080/imiao-admin",
+    // baseURL: "http://127.0.0.1:8080/imiao-admin",
+    baseURL: "http://127.0.0.1:8080",
 });
 
 // 请求拦截
@@ -38,13 +69,14 @@ instance.interceptors.response.use(
     function(res) {
         // 对响应数据做点什么
         store.dispatch('setLoading', false)
-        if (res.data.status == 401) {
+        if (res.data.code == 401) {
             ElementUI.Message({
                 message: res.data.msg,
                 type: 'error'
             });
+            router.push({ path: '/' }); // 跳转到首页
             return Promise.reject(res.data.msg);
-        } else if (res.data.status != 200) {
+        } else if (res.data.code != 200) {
             ElementUI.Message({
                 message: res.data.msg,
                 type: 'error'
@@ -59,7 +91,6 @@ instance.interceptors.response.use(
                 message: '网络请求出错，请联系技术人员',
                 type: 'error'
             })
-            // router.push({ path: '/' });
         return Promise.reject(error);
     }
 );

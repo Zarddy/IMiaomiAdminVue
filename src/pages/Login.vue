@@ -62,19 +62,20 @@ export default {
             this.$refs[formName].validate((valid) => {
                 if (valid) { // 提交登录信息
                     // 创建form表单数据
-                    let params = new FormData();
-                    params.append("account", this.loginForm.account);
-                    params.append("password", this.loginForm.password);
+                    // let params = new FormData();
+                    // params.append("account", this.loginForm.account);
+                    // params.append("password", this.loginForm.password);
                     // 以post形式提交
-                    this.$http.post('/login',params).then(
+                    this.$http.post('/login', {"account": this.loginForm.account,
+                    "password": this.loginForm.password}).then(
                         data=> {
-                            if (data.status == 200) {
+                            if (data.code == 200) {
                                 // TODO 登录成功，将会返回token
-                                console.log("登录成功，token: " + data.data.token);
+                                console.log("登录成功，token: " + data.result.token);
 
-                                this.$http.defaults.headers['Authorization'] = data.data.token;
+                                this.$http.defaults.headers['Authorization'] = data.result.token;
 
-                                let base64Data = Base64.encode(JSON.stringify({ token: data.data.token}));
+                                let base64Data = Base64.encode(JSON.stringify({ token: data.result.token}));
                                 sessionStorage.setItem("user", base64Data);
 
                                 // 跳转到List页面
@@ -97,7 +98,7 @@ export default {
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
-<style scoped>
+<style scoped lang="scss">
 .account-login {
 
     margin-top: 25%;
